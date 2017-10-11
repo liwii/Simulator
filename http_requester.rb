@@ -6,8 +6,6 @@ class HttpRequester
   def get_json(url, params)
     uri = URI.parse(url)
     uri.query = URI.encode_www_form(params)
-    puts uri
-    puts uri.path
     request = Net::HTTP::Get.new(uri)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true

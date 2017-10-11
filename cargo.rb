@@ -15,6 +15,11 @@ class Cargo
     @history.write(position: position, time: time, action: "移動")
   end
 
+  def exchanged(position, time)
+    @position = position
+    @history.write(position: position, time: time, action: "交換")
+  end
+
   def picked(time)
     @history.write(position: @position, time: time, action: "集荷")
     @state = "配達中"
