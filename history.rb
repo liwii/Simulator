@@ -4,6 +4,8 @@ require './geo_requester.rb'
 class History
   def initialize
     @list = []
+    @top_header = []
+    @bottom_header = []
   end
 
   def write(position: , time: , action: )
@@ -11,8 +13,17 @@ class History
     @list.push(new_history)
   end
 
+  def add_time_header(title: , time: )
+    @top_header.push(title)
+    @bottom_header.push(time_adapter(time))
+  end
+
   def output(filename)
     CSV.open("#{filename}.csv", 'w') do |csv|
+      if !@top_header.empty?
+        csv << @top_header
+        csv << @bottom_header
+      end
       csv << ["住所", "時間", "動作"]
       @list.each do |history|
         address = position_adapter(history[:position])

@@ -14,6 +14,7 @@ class Truck
     @cargos = []
     @bound = bound
     @time_loss = time_loss
+    @warehouse = nil
   end
 
   def move(orders)
@@ -22,6 +23,7 @@ class Truck
       move_to_gather
       return nil
     end
+    
     if orders.empty? && @cargos.empty?
       wait
       return nil
@@ -37,7 +39,7 @@ class Truck
   end
 
   def pick_mine(cargos)
-    @cargos = cargos.find_all{|cargo| @bound.in_bound?}
+    @cargos = cargos.find_all{|cargo| @bound.in_bound?(cargo.destination)}
     @warehouse = nil
     @cargos.each do |cargo|
       cargo.exchanged(@position, @time)
@@ -50,11 +52,16 @@ class Truck
   end
 
   def not_in_charge_cargos
-    @cargos.find_all{|cargo| @bound.in_bound?(cargo.destination)}
+    @cargos.find_all{|cargo| !@bound.in_bound?(cargo.destination)}
   end
+
+  def should_gather?
+    @cargos.any?{|cargo| cargo.able?(@time) && !@bound.in_bound?(cargo.destination)}
+  end
+
   private
   def move_to_gather
-    if @warehouse.position = @position
+    if @warehouse.position == @position
       wait
       return
     end
@@ -99,6 +106,9 @@ class Truck
   end
 
   def closest(orders)
+    urgent_cargos = @cargos.find_all{|cargo| cargo.urgent?(@time)}
+    able_cargos = @cargos.find_all{|cargo| cargo.able?(@time)}
+    cargos = urgent_cargos.empty? ? able_cargos : urgent_cargos
     selected_cargos = @cargos.find_all{|cargo| @bound.in_bound?(cargo.destination)}
     selected_orders = orders.find_all{|order| @bound.in_bound?(order.position)}
     requester = RouteRequester.new

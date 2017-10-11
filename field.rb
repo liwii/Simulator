@@ -44,10 +44,11 @@ class Field
     order_count = @orders.length
     carried_cargo_count = @trucks.inject(0){|sum, truck| sum + truck.cargos.length}
     finished_count = @finished_cargos.length
+    in_time_count = @finished_cargos.count{ |cargo| cargo.in_time?}
     historical_cargos = []
     CSV.open("report.csv", "w") do |csv|
-      csv << ["一回の荷物のやり取りでのタイムロス","注文の発生間隔","未回収荷物の数", "配達中荷物の数", "配達済み荷物の数"]
-      csv << ["#{@time_loss}秒","#{@interval}秒",order_count, carried_cargo_count, finished_count]
+      csv << ["一回の荷物のやり取りでのタイムロス","注文の発生間隔","未回収荷物の数", "配達中荷物の数", "配達済み荷物の数", "時間内に届けられた荷物の数"]
+      csv << ["#{@time_loss}秒","#{@interval}秒",order_count, carried_cargo_count, finished_count, in_time_count]
     end
     @trucks.each.with_index do |truck, i|
       truck.output_history(i)
